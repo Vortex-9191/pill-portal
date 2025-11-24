@@ -143,20 +143,20 @@ export default async function SearchPage({
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-rose-50/30">
       <Header />
-      <main className="flex-1 bg-background">
+      <main className="flex-1">
         {/* Breadcrumb */}
-        <div className="border-b border-border bg-muted/30">
-          <div className="container py-4">
+        <div className="border-b border-slate-100 bg-white/80 backdrop-blur-sm">
+          <div className="max-w-6xl mx-auto px-4 py-4">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/">ホーム</BreadcrumbLink>
+                  <BreadcrumbLink href="/" className="text-slate-500 hover:text-rose-500 transition">ホーム</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>検索</BreadcrumbPage>
+                  <BreadcrumbPage className="text-slate-800 font-medium">検索</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -164,14 +164,14 @@ export default async function SearchPage({
         </div>
 
         {/* Search Header */}
-        <div className="border-b border-border bg-card">
-          <div className="container py-6">
+        <div className="border-b border-slate-100 bg-white">
+          <div className="max-w-6xl mx-auto px-4 py-6">
             <SearchForm />
           </div>
         </div>
 
         {/* Results Section */}
-        <div className="container py-8">
+        <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
             {/* Filters Sidebar */}
             <aside className="hidden lg:block">
@@ -186,18 +186,18 @@ export default async function SearchPage({
               <ClinicFinderWrapper />
 
               {/* Results Header */}
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                 <div>
-                  <h1 className="text-2xl font-bold text-foreground">
+                  <h1 className="text-2xl font-bold text-slate-800">
                     {query ? `「${query}」の検索結果` : prefecture ? `${prefecture}のクリニック` : "クリニック検索"}
                   </h1>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="mt-1 text-sm text-slate-500 font-medium">
                     {totalCount || 0}件中 {totalCount > 0 ? from + 1 : 0}〜{Math.min(to, totalCount || 0)}件を表示
                   </p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Button variant="outline" size="sm" className="lg:hidden bg-transparent">
+                  <Button variant="outline" size="sm" className="lg:hidden bg-white border-slate-200 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-600 transition">
                     <SlidersHorizontal className="mr-2 h-4 w-4" />
                     絞り込み
                   </Button>
@@ -206,9 +206,9 @@ export default async function SearchPage({
               </div>
 
               {/* Clinic Cards */}
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {clinics && clinics.length > 0 ? (
-                  clinics.map((clinic) => {
+                  clinics.map((clinic, idx) => {
                     // Get first weekday with hours for display
                     const weekdays = [
                       { en: 'hours_monday' as const, jp: '月曜' },
@@ -230,6 +230,7 @@ export default async function SearchPage({
                     return (
                       <ClinicCard
                         key={clinic.id}
+                        rank={idx + 1}
                         clinic={{
                           id: String(clinic.id),
                           name: clinic.clinic_name,
@@ -247,8 +248,8 @@ export default async function SearchPage({
                     )
                   })
                 ) : (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">
+                  <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
+                    <p className="text-slate-500 font-medium">
                       検索条件に一致するクリニックが見つかりませんでした。
                     </p>
                   </div>

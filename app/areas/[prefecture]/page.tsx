@@ -1,5 +1,3 @@
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
 import { ClinicCard } from "@/components/clinic-card"
 import Link from "next/link"
 import { ChevronRight, MapPin, Train } from "lucide-react"
@@ -206,7 +204,6 @@ export default async function PrefecturePage({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
       <main className="flex-1">
         {/* Breadcrumb */}
         <div className="border-b border-border bg-muted/30">
@@ -362,7 +359,6 @@ export default async function PrefecturePage({
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   )
 }
