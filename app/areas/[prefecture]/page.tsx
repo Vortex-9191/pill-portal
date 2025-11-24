@@ -5,12 +5,12 @@ import Link from "next/link"
 import { ChevronRight, MapPin, Train } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { createClient } from "@/lib/supabase/server"
 import { SearchFilters } from "@/components/search-filters"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { getStationSlug } from "@/lib/data/stations"
 import { ClinicFinderWrapper } from "@/components/clinic-finder-wrapper"
+import { getClinicsData, PREFECTURE_SLUGS } from "@/lib/api/locations"
 
 // Prefecture slug to name mapping
 const prefectureMap: Record<string, string> = {
@@ -67,8 +67,8 @@ export async function generateMetadata({ params }: { params: { prefecture: strin
   const prefectureName = prefectureMap[params.prefecture] || "都道府県"
 
   return {
-    title: `${prefectureName}のAGA治療クリニック一覧 | aga治療.com`,
-    description: `${prefectureName}のAGA治療専門クリニック一覧。診療時間、住所、アクセス、口コミ情報を掲載。`,
+    title: `${prefectureName}の低用量ピル処方クリニック一覧 | 低用量ピル.com`,
+    description: `${prefectureName}の低用量ピル処方クリニック一覧。診療時間、住所、アクセス情報を掲載。`,
   }
 }
 
@@ -95,262 +95,114 @@ export default async function PrefecturePage({
     notFound()
   }
 
-  const supabase = await createClient()
+  const allClinicsData = await getClinicsData()
+  console.log(`[AreaPage] Fetched ${allClinicsData.length} clinics`)
   const currentPage = Number(searchParams.page) || 1
 
-  // Get clinics for facet generation with current filters applied (except city filter)
-  let facetQuery = supabase
-    .from("clinics")
-    .select("municipalities, stations, featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features")
-    .eq("prefecture", prefectureName)
-
-  // Apply same filters as main query, except city (so we can show all cities)
-  if (searchParams.specialty) {
-    facetQuery = facetQuery.ilike("featured_subjects", `%${searchParams.specialty}%`)
-  }
-
-  if (searchParams.feature) {
-    facetQuery = facetQuery.ilike("features", `%${searchParams.feature}%`)
-  }
-
-  if (searchParams.weekend) {
-    facetQuery = facetQuery.or("hours_saturday.not.is.null,hours_sunday.not.is.null")
-  }
-
-  if (searchParams.evening) {
-    facetQuery = facetQuery.or(
-      "hours_monday.ilike.%18:%,hours_monday.ilike.%19:%,hours_monday.ilike.%20:%,hours_tuesday.ilike.%18:%,hours_tuesday.ilike.%19:%,hours_tuesday.ilike.%20:%,hours_wednesday.ilike.%18:%,hours_wednesday.ilike.%19:%,hours_wednesday.ilike.%20:%,hours_thursday.ilike.%18:%,hours_thursday.ilike.%19:%,hours_thursday.ilike.%20:%,hours_friday.ilike.%18:%,hours_friday.ilike.%19:%,hours_friday.ilike.%20:%"
-    )
-  }
-
-  if (searchParams.director) {
-    facetQuery = facetQuery.not("director_name", "is", null)
-  }
-
-  const { data: allClinics } = await facetQuery
-
-  const uniqueCities = Array.from(
-    new Set(allClinics?.map((m) => m.municipalities).filter(Boolean))
-  ).sort()
-
-  // Build query for clinics
-  let clinicsQuery = supabase
-    .from("clinics")
-    .select("*", { count: "exact" })
-    .eq("prefecture", prefectureName)
+  // Filter by prefecture
+  let prefectureClinics = allClinicsData.filter((c: any) => c.prefecture === prefectureName)
+  console.log(`[AreaPage] Found ${prefectureClinics.length} clinics for ${prefectureName}`)
 
   // Apply filters
+  let filteredClinics = [...prefectureClinics]
+
   if (searchParams.city) {
-    clinicsQuery = clinicsQuery.eq("municipalities", searchParams.city)
+    filteredClinics = filteredClinics.filter(c => c.city === searchParams.city)
   }
 
   if (searchParams.specialty) {
-    clinicsQuery = clinicsQuery.ilike("featured_subjects", `%${searchParams.specialty}%`)
-  }
-
-  if (searchParams.feature) {
-    clinicsQuery = clinicsQuery.ilike("features", `%${searchParams.feature}%`)
-  }
-
-  if (searchParams.weekend) {
-    clinicsQuery = clinicsQuery.or("hours_saturday.not.is.null,hours_sunday.not.is.null")
-  }
-
-  if (searchParams.evening) {
-    clinicsQuery = clinicsQuery.or(
-      "hours_monday.ilike.%18:%,hours_monday.ilike.%19:%,hours_monday.ilike.%20:%,hours_tuesday.ilike.%18:%,hours_tuesday.ilike.%19:%,hours_tuesday.ilike.%20:%,hours_wednesday.ilike.%18:%,hours_wednesday.ilike.%19:%,hours_wednesday.ilike.%20:%,hours_thursday.ilike.%18:%,hours_thursday.ilike.%19:%,hours_thursday.ilike.%20:%,hours_friday.ilike.%18:%,hours_friday.ilike.%19:%,hours_friday.ilike.%20:%"
+    filteredClinics = filteredClinics.filter(c =>
+      c.specialties && c.specialties.some((s: string) => s.includes(searchParams.specialty!))
     )
   }
 
-  if (searchParams.director) {
-    clinicsQuery = clinicsQuery.not("director_name", "is", null)
+  // Note: 'feature', 'weekend', 'evening', 'director' filters are tricky with the current simple JSON structure
+  // The scraper populates 'badge' which might contain some features.
+  // 'hours' are not fully parsed in the current scraper (it's just a placeholder or partial).
+  // We will implement basic filtering where possible.
+
+  if (searchParams.feature) {
+    filteredClinics = filteredClinics.filter(c =>
+      c.badge && c.badge.some((b: string) => b.includes(searchParams.feature!))
+    )
   }
 
-  // Get total count
-  const { count: totalCount } = await clinicsQuery
+  const totalCount = filteredClinics.length
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
-  // Get paginated data
   const from = (currentPage - 1) * ITEMS_PER_PAGE
-  const to = from + ITEMS_PER_PAGE - 1
+  const to = Math.min(from + ITEMS_PER_PAGE, totalCount)
 
-  const { data: clinics, error } = await clinicsQuery
-    .order("rating", { ascending: false, nullsLast: true })
-    .range(from, to)
+  const paginatedClinics = filteredClinics.slice(from, to)
 
-  if (error) {
-    console.error("[v0] Error fetching clinics:", error)
-  }
+  // Calculate facets from prefectureClinics (before other filters, to show available options)
+  const uniqueCities = Array.from(new Set(prefectureClinics.map((c: any) => c.city).filter(Boolean))).sort() as string[]
 
-  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE)
-
-  // Calculate facet data
   const specialtyMap = new Map<string, number>()
+  prefectureClinics.forEach((c: any) => {
+    if (c.specialties) {
+      c.specialties.forEach((s: string) => {
+        specialtyMap.set(s, (specialtyMap.get(s) || 0) + 1)
+      })
+    }
+  })
+
   const featureMap = new Map<string, number>()
-  let weekendCount = 0
-  let eveningCount = 0
-  let directorCount = 0
-
-  allClinics?.forEach((clinic) => {
-    // Specialties
-    if (clinic.featured_subjects) {
-      clinic.featured_subjects.split(",").forEach((s: string) => {
-        const specialty = s.trim()
-        if (specialty) {
-          specialtyMap.set(specialty, (specialtyMap.get(specialty) || 0) + 1)
-        }
+  prefectureClinics.forEach((c: any) => {
+    if (c.badge) {
+      c.badge.forEach((b: string) => {
+        featureMap.set(b, (featureMap.get(b) || 0) + 1)
       })
-    }
-
-    // Features
-    if (clinic.features) {
-      clinic.features.split(",").forEach((f: string) => {
-        const feature = f.trim()
-        if (feature && feature !== "-") {
-          featureMap.set(feature, (featureMap.get(feature) || 0) + 1)
-        }
-      })
-    }
-
-    // Weekend
-    if (clinic.hours_saturday || clinic.hours_sunday) {
-      weekendCount++
-    }
-
-    // Evening (18:00以降)
-    const hasEvening = [
-      clinic.hours_monday,
-      clinic.hours_tuesday,
-      clinic.hours_wednesday,
-      clinic.hours_thursday,
-      clinic.hours_friday,
-    ].some((hours) => hours && (hours.includes("18:") || hours.includes("19:") || hours.includes("20:")))
-    if (hasEvening) {
-      eveningCount++
-    }
-
-    // Director
-    if (clinic.director_name) {
-      directorCount++
     }
   })
 
   const facetData = {
-    prefectures: [], // Not needed for prefecture page
+    prefectures: [],
     cities: uniqueCities,
     specialties: Array.from(specialtyMap.entries())
       .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 15),
+      .sort((a, b) => b.count - a.count),
     features: Array.from(featureMap.entries())
       .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10),
-    weekend: weekendCount,
-    evening: eveningCount,
-    director: directorCount,
+      .sort((a, b) => b.count - a.count),
+    weekend: 0, // Not implemented in scraper yet
+    evening: 0, // Not implemented in scraper yet
+    director: 0, // Not implemented in scraper yet
   }
 
-  // Extract municipalities with counts from clinic_counts table
-  const { data: municipalityCounts } = await supabase
-    .from("clinic_counts")
-    .select("municipality, clinic_count")
-    .eq("count_type", "municipality")
-    .eq("prefecture", prefectureName)
-    .not("municipality", "is", null)
-    .order("clinic_count", { ascending: false })
-    .limit(10)
+  // Related Municipalities (Cities)
+  const relatedMunicipalities = uniqueCities.map(city => ({
+    name: city,
+    count: prefectureClinics.filter((c: any) => c.city === city).length
+  })).sort((a, b) => b.count - a.count).slice(0, 10)
 
-  const relatedMunicipalities = municipalityCounts
-    ? municipalityCounts.map((row: { municipality: string; clinic_count: number }) => ({
-        name: row.municipality,
-        count: row.clinic_count
-      }))
-    : []
+  // Related Stations
+  const stationMap = new Map<string, number>()
+  prefectureClinics.forEach((c: any) => {
+    if (c.station) {
+      stationMap.set(c.station, (stationMap.get(c.station) || 0) + 1)
+    }
+  })
+  const relatedStations = Array.from(stationMap.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10)
 
-  // Fallback: use allClinics if clinic_counts query failed or returned empty
-  if (relatedMunicipalities.length === 0 && allClinics) {
-    const municipalityMap = new Map<string, number>()
-    allClinics.forEach((clinic: any) => {
-      if (clinic.municipalities) {
-        const municipality = clinic.municipalities.trim()
-        municipalityMap.set(municipality, (municipalityMap.get(municipality) || 0) + 1)
-      }
-    })
-    relatedMunicipalities.push(
-      ...Array.from(municipalityMap.entries())
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10)
-    )
-  }
-
-  // Extract stations with counts from clinic_counts table
-  const { data: stationCounts } = await supabase
-    .from("clinic_counts")
-    .select("station, clinic_count")
-    .eq("count_type", "station")
-    .eq("prefecture", prefectureName)
-    .not("station", "is", null)
-    .order("clinic_count", { ascending: false })
-    .limit(10)
-
-  const relatedStations = stationCounts
-    ? stationCounts.map((row: { station: string; clinic_count: number }) => ({
-        name: row.station,
-        count: row.clinic_count
-      }))
-    : []
-
-  // Fallback: use allClinics if clinic_counts query failed or returned empty
-  if (relatedStations.length === 0 && allClinics) {
-    const stationMap = new Map<string, number>()
-    allClinics.forEach((clinic: any) => {
-      if (clinic.stations) {
-        const stations = clinic.stations.split(",").map((s: string) => s.trim())
-        stations.forEach((station: string) => {
-          if (station && station !== "-") {
-            stationMap.set(station, (stationMap.get(station) || 0) + 1)
-          }
-        })
-      }
-    })
-    relatedStations.push(
-      ...Array.from(stationMap.entries())
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10)
-    )
-  }
-
-  // Transform data for ClinicCard
-  const clinicCards =
-    clinics?.map((clinic) => {
-      const weekdays = [
-        { en: "hours_monday", jp: "月曜" },
-        { en: "hours_tuesday", jp: "火曜" },
-        { en: "hours_wednesday", jp: "水曜" },
-        { en: "hours_thursday", jp: "木曜" },
-        { en: "hours_friday", jp: "金曜" },
-        { en: "hours_saturday", jp: "土曜" },
-        { en: "hours_sunday", jp: "日曜" },
-      ]
-      const firstHours = weekdays.find((day) => clinic[day.en] && clinic[day.en] !== "-")
-      const hoursPreview = firstHours ? `${firstHours.jp}: ${clinic[firstHours.en]}` : null
-
-      return {
-        id: clinic.id,
-        name: clinic.clinic_name,
-        slug: clinic.slug,
-        address: clinic.address,
-        station: clinic.stations || "",
-        specialties: clinic.featured_subjects ? clinic.featured_subjects.split(", ") : [],
-        phone: clinic.corp_tel,
-        prefecture: clinic.prefecture,
-        city: clinic.municipalities,
-        hours: hoursPreview,
-        directorName: clinic.director_name,
-      }
-    }) || []
+  // Transform for ClinicCard
+  const clinicCards = paginatedClinics.map((clinic: any) => ({
+    id: clinic.id,
+    name: clinic.name,
+    slug: clinic.slug,
+    address: clinic.address,
+    station: clinic.station,
+    specialties: clinic.specialties || [],
+    phone: clinic.phone,
+    prefecture: clinic.prefecture,
+    city: clinic.city,
+    hours: "診療時間は詳細をご確認ください", // Placeholder
+    directorName: null, // Not scraped
+    ...clinic // Pass other props
+  }))
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -380,7 +232,7 @@ export default async function PrefecturePage({
               <MapPin className="h-8 w-8 text-accent" />
               <h1 className="text-3xl font-bold text-foreground md:text-4xl">{prefectureName}のクリニック</h1>
             </div>
-            <p className="text-lg text-muted-foreground">{totalCount || 0}件のクリニック</p>
+            <p className="text-lg text-muted-foreground">{totalCount}件のクリニック</p>
           </div>
         </div>
 
@@ -400,13 +252,13 @@ export default async function PrefecturePage({
 
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  {totalCount || 0}件中 {from + 1}〜{Math.min(to + 1, totalCount || 0)}件を表示
+                  {totalCount}件中 {from + 1}〜{Math.min(to, totalCount)}件を表示
                 </p>
               </div>
 
               <div className="space-y-4">
                 {clinicCards.length > 0 ? (
-                  clinicCards.map((clinic) => <ClinicCard key={clinic.id} clinic={clinic} />)
+                  clinicCards.map((clinic: any) => <ClinicCard key={clinic.id} clinic={clinic} />)
                 ) : (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">条件に一致するクリニックが見つかりませんでした。</p>
@@ -451,7 +303,7 @@ export default async function PrefecturePage({
                     {relatedMunicipalities.map((municipality) => (
                       <Link
                         key={municipality.name}
-                        href={`/areas/${params.prefecture}/${encodeURIComponent(municipality.name)}`}
+                        href={`/areas/${params.prefecture}?city=${encodeURIComponent(municipality.name)}`}
                         className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent hover:border-coral transition-colors group"
                       >
                         <div className="flex items-center gap-3">
@@ -480,11 +332,17 @@ export default async function PrefecturePage({
                 <CardContent>
                   <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
                     {relatedStations.map((station) => {
-                      const stationSlug = getStationSlug(station.name)
+                      // Note: We don't have station slugs in this context easily unless we look them up.
+                      // For now, we'll link to the station page if we can derive the slug, or just search.
+                      // The scraper generates stationSlug in the clinic object.
+                      // Let's try to find a clinic with this station to get the slug.
+                      const sampleClinic = prefectureClinics.find((c: any) => c.station === station.name);
+                      const stationSlug = sampleClinic?.stationSlug || getStationSlug(station.name);
+
                       return (
                         <Link
                           key={station.name}
-                          href={`/stations/${stationSlug}`}
+                          href={`/${PREFECTURE_SLUGS[prefectureName] || 'tokyo'}/${sampleClinic?.city || 'city'}/${stationSlug}`}
                           className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent hover:border-coral transition-colors group"
                         >
                           <div className="flex items-center gap-3">

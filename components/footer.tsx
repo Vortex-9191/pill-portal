@@ -1,164 +1,55 @@
-import Link from "next/link"
-
-const regions = [
-  {
-    name: "関東",
-    prefectures: [
-      { name: "東京都", slug: "tokyo" },
-      { name: "神奈川県", slug: "kanagawa" },
-      { name: "埼玉県", slug: "saitama" },
-      { name: "千葉県", slug: "chiba" },
-      { name: "茨城県", slug: "ibaraki" },
-      { name: "栃木県", slug: "tochigi" },
-      { name: "群馬県", slug: "gunma" },
-    ],
-  },
-  {
-    name: "関西",
-    prefectures: [
-      { name: "大阪府", slug: "osaka" },
-      { name: "兵庫県", slug: "hyogo" },
-      { name: "京都府", slug: "kyoto" },
-      { name: "奈良県", slug: "nara" },
-      { name: "滋賀県", slug: "shiga" },
-      { name: "和歌山県", slug: "wakayama" },
-    ],
-  },
-  {
-    name: "中部",
-    prefectures: [
-      { name: "愛知県", slug: "aichi" },
-      { name: "静岡県", slug: "shizuoka" },
-      { name: "岐阜県", slug: "gifu" },
-      { name: "長野県", slug: "nagano" },
-      { name: "新潟県", slug: "niigata" },
-      { name: "富山県", slug: "toyama" },
-      { name: "石川県", slug: "ishikawa" },
-      { name: "福井県", slug: "fukui" },
-      { name: "山梨県", slug: "yamanashi" },
-    ],
-  },
-  {
-    name: "九州・沖縄",
-    prefectures: [
-      { name: "福岡県", slug: "fukuoka" },
-      { name: "熊本県", slug: "kumamoto" },
-      { name: "鹿児島県", slug: "kagoshima" },
-      { name: "長崎県", slug: "nagasaki" },
-      { name: "大分県", slug: "oita" },
-      { name: "宮崎県", slug: "miyazaki" },
-      { name: "佐賀県", slug: "saga" },
-      { name: "沖縄県", slug: "okinawa" },
-    ],
-  },
-  {
-    name: "北海道・東北",
-    prefectures: [
-      { name: "北海道", slug: "hokkaido" },
-      { name: "宮城県", slug: "miyagi" },
-      { name: "福島県", slug: "fukushima" },
-      { name: "青森県", slug: "aomori" },
-      { name: "岩手県", slug: "iwate" },
-      { name: "秋田県", slug: "akita" },
-      { name: "山形県", slug: "yamagata" },
-    ],
-  },
-  {
-    name: "中国・四国",
-    prefectures: [
-      { name: "広島県", slug: "hiroshima" },
-      { name: "岡山県", slug: "okayama" },
-      { name: "山口県", slug: "yamaguchi" },
-      { name: "愛媛県", slug: "ehime" },
-      { name: "香川県", slug: "kagawa" },
-      { name: "徳島県", slug: "tokushima" },
-      { name: "高知県", slug: "kochi" },
-      { name: "鳥取県", slug: "tottori" },
-      { name: "島根県", slug: "shimane" },
-    ],
-  },
-]
+import Link from 'next/link'
+import { Heart, ChevronRight } from 'lucide-react'
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-secondary/30">
-      <div className="container py-12 md:py-16">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-primary">低用量ピル.com</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              低用量ピルのオンライン処方・クリニック検索サイト。<br />
-              生理痛、避妊、肌荒れなど、女性のお悩みに寄り添うクリニックをご紹介します。
-            </p>
+    <footer className="bg-white border-t border-slate-100 pt-16 pb-24 md:pb-8 text-sm text-slate-500">
+      <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8 mb-12">
+        <div className="col-span-1 md:col-span-1">
+          <div className="flex items-center gap-2 text-slate-800 font-bold text-xl mb-6">
+            <div className="bg-rose-500 p-1.5 rounded-lg text-white">
+              <Heart size={20} fill="currentColor" />
+            </div>
+            ピルミライ
           </div>
-
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-foreground">クリニックを探す</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/search" className="hover:text-primary transition-colors">条件から探す</Link></li>
-              <li><Link href="/areas" className="hover:text-primary transition-colors">エリアから探す</Link></li>
-              <li><Link href="/stations" className="hover:text-primary transition-colors">駅から探す</Link></li>
-            </ul>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-foreground">コンテンツ</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/about-pill" className="hover:text-primary transition-colors">ピルについて</Link></li>
-              <li><Link href="/flow" className="hover:text-primary transition-colors">処方の流れ</Link></li>
-              <li><Link href="/faq" className="hover:text-primary transition-colors">よくある質問</Link></li>
-              <li><Link href="/column" className="hover:text-primary transition-colors">コラム</Link></li>
-            </ul>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-foreground">ポリシー</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/terms" className="hover:text-primary transition-colors">利用規約</Link></li>
-              <li><Link href="/privacy" className="hover:text-primary transition-colors">プライバシーポリシー</Link></li>
-              <li><Link href="/company" className="hover:text-primary transition-colors">運営会社</Link></li>
-            </ul>
-          </div>
+          <p className="text-xs leading-relaxed mb-6">
+            ピルミライは、女性の健康課題を解決するための総合情報ポータルサイトです。<br />
+            信頼できる医療機関の情報と、正しい知識の発信に努めています。
+          </p>
         </div>
 
-        {/* All Prefectures Section */}
-        <div className="mt-8 pt-8 border-t border-primary/10">
-          <div className="mb-6 flex items-center justify-between">
-            <h4 className="text-sm font-semibold text-foreground">都道府県・市区町村から探す</h4>
-            <Link
-              href="/areas"
-              className="text-xs text-primary hover:underline"
-            >
-              すべて見る →
-            </Link>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {regions.map((region) => (
-              <div key={region.name}>
-                <h5 className="mb-2 text-xs font-semibold text-foreground">{region.name}</h5>
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
-                  {region.prefectures.map((prefecture) => (
-                    <Link
-                      key={prefecture.slug}
-                      href={`/areas/${prefecture.slug}`}
-                      className="text-xs text-muted-foreground hover:text-primary hover:underline"
-                    >
-                      {prefecture.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+        <div>
+          <h4 className="text-slate-800 font-bold mb-6 text-base">コンテンツ</h4>
+          <ul className="space-y-3">
+            <li><Link href="/about-pill" className="hover:text-rose-500 transition flex items-center gap-2"><ChevronRight size={12} /> ピル基礎知識・効果</Link></li>
+            <li><Link href="/search" className="hover:text-rose-500 transition flex items-center gap-2"><ChevronRight size={12} /> オンライン診療ランキング</Link></li>
+            <li><Link href="/about-pill/usage" className="hover:text-rose-500 transition flex items-center gap-2"><ChevronRight size={12} /> ピルの種類一覧</Link></li>
+            <li><Link href="/search" className="hover:text-rose-500 transition flex items-center gap-2"><ChevronRight size={12} /> ユーザー体験談</Link></li>
+          </ul>
         </div>
 
-        <div className="border-t border-border mt-8 pt-8">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <p className="text-xs text-muted-foreground">
-              &copy; {new Date().getFullYear()} 低用量ピル.com All rights reserved.
-            </p>
-          </div>
+        <div>
+          <h4 className="text-slate-800 font-bold mb-6 text-base">エリア検索</h4>
+          <ul className="space-y-3">
+            <li><Link href="/areas/tokyo" className="hover:text-rose-500 transition flex items-center gap-2"><ChevronRight size={12} /> 東京の婦人科</Link></li>
+            <li><Link href="/areas/osaka" className="hover:text-rose-500 transition flex items-center gap-2"><ChevronRight size={12} /> 大阪の婦人科</Link></li>
+            <li><Link href="/areas/aichi" className="hover:text-rose-500 transition flex items-center gap-2"><ChevronRight size={12} /> 名古屋の婦人科</Link></li>
+            <li><Link href="/search" className="hover:text-rose-500 transition flex items-center gap-2"><ChevronRight size={12} /> 全国のオンライン診療</Link></li>
+          </ul>
         </div>
+
+        <div>
+          <h4 className="text-slate-800 font-bold mb-6 text-base">サイト情報</h4>
+          <ul className="space-y-3">
+            <li><Link href="/company" className="hover:text-rose-500 transition flex items-center gap-2"><ChevronRight size={12} /> 運営会社</Link></li>
+            <li><Link href="/privacy" className="hover:text-rose-500 transition flex items-center gap-2"><ChevronRight size={12} /> プライバシーポリシー</Link></li>
+            <li><Link href="/guidelines" className="hover:text-rose-500 transition flex items-center gap-2"><ChevronRight size={12} /> 医療広告ガイドライン</Link></li>
+            <li><Link href="/contact" className="hover:text-rose-500 transition flex items-center gap-2"><ChevronRight size={12} /> お問い合わせ</Link></li>
+          </ul>
+        </div>
+      </div>
+      <div className="max-w-6xl mx-auto px-4 border-t border-slate-100 pt-8 text-center text-xs text-slate-400">
+        &copy; 2025 Pill Mirai. All Rights Reserved.
       </div>
     </footer>
   )

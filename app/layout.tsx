@@ -1,13 +1,20 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Noto_Sans_JP } from "next/font/google"
+import { Noto_Sans_JP, Zen_Maru_Gothic } from "next/font/google"
 import { Suspense } from "react"
 import "./globals.css"
+import { MobileNav } from "@/components/mobile-nav"
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   variable: "--font-noto-sans-jp",
+})
+
+const zenMaruGothic = Zen_Maru_Gothic({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-zen-maru-gothic",
 })
 
 export const metadata: Metadata = {
@@ -23,8 +30,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className={`font-sans ${notoSansJP.variable} antialiased`}>
+      <body className={`font-sans ${notoSansJP.variable} ${zenMaruGothic.variable} antialiased font-['Zen_Maru_Gothic',_sans-serif]`}>
         <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+        <MobileNav />
         {/* Analytics component removed */}
       </body>
     </html>

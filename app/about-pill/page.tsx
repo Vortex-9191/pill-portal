@@ -93,7 +93,7 @@ export default function AboutPillPage() {
         <section className="py-16 md:py-24">
           <div className="container max-w-4xl">
             <h2 className="text-2xl font-bold mb-8 text-center">副作用について</h2>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-8">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-8 mb-8">
               <div className="flex gap-4 items-start">
                 <AlertCircle className="h-6 w-6 text-yellow-600 flex-shrink-0 mt-1" />
                 <div className="space-y-4">
@@ -107,6 +107,18 @@ export default function AboutPillPage() {
                   </p>
                 </div>
               </div>
+            </div>
+            <div className="text-center space-x-4">
+              <Button variant="outline" className="rounded-full" asChild>
+                <Link href="/about-pill/side-effects">
+                  副作用について詳しく見る
+                </Link>
+              </Button>
+              <Button variant="outline" className="rounded-full" asChild>
+                <Link href="/about-pill/usage">
+                  正しい飲み方を知る
+                </Link>
+              </Button>
             </div>
           </div>
         </section>

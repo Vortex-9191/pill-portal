@@ -110,6 +110,7 @@
 }
 
 @theme inline {
+  --font-zen-maru: var(--font-zen-maru-gothic);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --color-background: var(--background);

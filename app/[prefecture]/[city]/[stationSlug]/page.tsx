@@ -27,23 +27,47 @@ export async function generateMetadata({ params }: { params: { prefecture: strin
   if (!station) return {};
   const title = `${station.nameKanji}駅周辺のクリニック一覧 | 低用量ピル.com`;
   const description = `${station.nameKanji}駅から徒歩圏内のクリニックを${station.prefecture}・${station.city}エリアで比較できます。内科・小児科・皮膚科などの診療科や診療時間で絞り込み可能です。`;
+  const url = `https://pill-portal.com/${params.prefecture}/${params.city}/${params.stationSlug}`;
+
   return {
     title,
     description,
-    // Open Graph / Twitter could be added here
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: "website",
+    },
   };
 }
 
+import { ClinicFilters } from "@/components/clinic-filters"; // Import filters
+
+// ... imports
+
 interface Props {
   params: { prefecture: string; city: string; stationSlug: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export default async function StationPage({ params }: Props) {
+export default async function StationPage({ params, searchParams }: Props) {
   const station = await getStationBySlug(params.stationSlug);
   if (!station) notFound();
 
-  // For now, no filters applied – fetch all clinics for the station
-  const clinics: Clinic[] = await getClinicsByStation(station.id);
+  // Parse filters from searchParams
+  const filters = {
+    specialty: typeof searchParams.specialty === "string" ? searchParams.specialty : undefined,
+    maxWalkingMinutes: typeof searchParams.walking === "string" ? parseInt(searchParams.walking) : undefined,
+    // online is handled by badge or separate logic if needed, but let's pass it if API supports it
+    // The API currently supports specialty and maxWalkingMinutes. 
+    // We might need to update API for online if strictly required, but let's start with what we have.
+  };
+
+  // Fetch clinics with filters
+  const clinics: Clinic[] = await getClinicsByStation(station.id, filters);
 
   // Breadcrumb items
   const breadcrumbItems = [
@@ -53,20 +77,68 @@ export default async function StationPage({ params }: Props) {
     { href: `/${station.prefecture}/${station.city}/${station.slug}/`, label: `${station.nameKanji}駅` },
   ];
 
+  // JSON-LD
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": breadcrumbItems.map((item, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "name": item.label,
+          "item": `https://pill-portal.com${item.href}`,
+        })),
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": `${station.nameKanji}駅近くで内科を探すポイントは？`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "駅から徒歩5分以内の内科クリニックは、通勤・通学の合間に受診しやすくおすすめです。",
+            },
+          },
+          {
+            "@type": "Question",
+            "name": "仕事帰りに通えるクリニックはありますか？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "夜間診療や土日診療を実施しているクリニックは、駅から徒歩10分以内に多数あります。",
+            },
+          },
+          {
+            "@type": "Question",
+            "name": "オンライン診療は利用できますか？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "対応クリニックはカードに「Web予約可」や「オンライン診療可」のバッジが表示されます。",
+            },
+          },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Header />
       <Breadcrumbs items={breadcrumbItems} />
       <StationHeader station={station} clinicCount={clinics.length} />
-      {/* Simple filter bar placeholder */}
-      <section className="bg-white py-4 border-b border-border">
-        <div className="container flex flex-wrap items-center gap-4 justify-center">
-          {/* Add real filter components later */}
-          <Button variant="outline" size="sm">診療科で絞り込み</Button>
-          <Button variant="outline" size="sm">徒歩分数で絞り込み</Button>
-          <Button variant="outline" size="sm">オンライン診療</Button>
+
+      {/* Filter Section */}
+      <section className="bg-gray-50 py-6 border-b border-border">
+        <div className="container max-w-5xl mx-auto">
+          <ClinicFilters />
         </div>
       </section>
+
       {/* Clinic list */}
       <main className="flex-1 bg-background py-8">
         <div className="container grid gap-8 md:grid-cols-2 lg:grid-cols-3">
