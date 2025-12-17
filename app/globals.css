@@ -4,110 +4,109 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Clinic Theme: Soft, Reassuring, Professional */
-
-  /* Backgrounds */
+  /* Professional Media Portal Theme */
+  /* Background: Clean white */
   --background: oklch(1 0 0);
-  /* White */
-  --foreground: oklch(0.3 0.05 260);
-  /* Dark Blue-Gray for text */
+  --foreground: oklch(0.2 0.01 350);
 
-  /* Cards */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.3 0.05 260);
+  /* Cards: Subtle gray background */
+  --card: oklch(0.99 0 0);
+  --card-foreground: oklch(0.2 0.01 350);
 
-  /* Popovers */
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.3 0.05 260);
+  --popover-foreground: oklch(0.2 0.01 350);
 
-  /* Primary: Soft Blue (Trust, Calm) */
-  --primary: oklch(0.85 0.05 230);
-  /* Soft Pastel Blue */
-  --primary-foreground: oklch(0.3 0.05 260);
+  /* Primary: Professional Pink (less saturated) */
+  --primary: oklch(0.65 0.15 15);
+  --primary-foreground: oklch(0.99 0 0);
 
-  /* Secondary: Soft Pink (Warmth, Care) */
-  --secondary: oklch(0.92 0.03 10);
-  /* Soft Pastel Pink */
-  --secondary-foreground: oklch(0.3 0.05 260);
+  /* Secondary: Light Gray */
+  --secondary: oklch(0.96 0.01 350);
+  --secondary-foreground: oklch(0.3 0.02 350);
 
-  /* Muted */
-  --muted: oklch(0.97 0.01 260);
-  --muted-foreground: oklch(0.55 0.03 260);
+  /* Accent: Muted Gold */
+  --accent: oklch(0.88 0.06 90);
+  --accent-foreground: oklch(0.2 0.01 350);
 
-  /* Accent: Gentle Coral/Peach */
-  --accent: oklch(0.9 0.05 50);
-  --accent-foreground: oklch(0.3 0.05 260);
+  --muted: oklch(0.97 0.005 350);
+  --muted-foreground: oklch(0.5 0.02 350);
 
-  /* Destructive */
   --destructive: oklch(0.6 0.2 25);
   --destructive-foreground: oklch(0.99 0 0);
 
-  /* Borders & Inputs */
-  --border: oklch(0.92 0.02 260);
-  --input: oklch(0.95 0.01 260);
-  --ring: oklch(0.85 0.05 230);
-  /* Matches Primary */
+  --border: oklch(0.9 0.01 350);
+  --input: oklch(0.95 0.01 350);
+  --ring: oklch(0.65 0.15 15);
 
-  /* Charts (Soft Palette) */
-  --chart-1: oklch(0.7 0.1 230);
-  /* Blue */
-  --chart-2: oklch(0.8 0.1 10);
-  /* Pink */
-  --chart-3: oklch(0.8 0.1 140);
-  /* Green */
-  --chart-4: oklch(0.85 0.08 60);
-  /* Orange */
-  --chart-5: oklch(0.7 0.1 280);
-  /* Purple */
+  --chart-1: oklch(0.65 0.15 15);
+  --chart-2: oklch(0.6 0.12 330);
+  --chart-3: oklch(0.7 0.1 300);
+  --chart-4: oklch(0.75 0.08 60);
+  --chart-5: oklch(0.55 0.08 280);
 
-  /* Radius: Soft rounded corners */
-  --radius: 0.75rem;
+  /* Tighter corners for professional look */
+  --radius: 0.5rem;
 
-  /* Sidebar (if needed) */
-  --sidebar: oklch(0.98 0.01 230);
-  --sidebar-foreground: oklch(0.3 0.05 260);
-  --sidebar-primary: oklch(0.85 0.05 230);
-  --sidebar-primary-foreground: oklch(0.3 0.05 260);
-  --sidebar-accent: oklch(0.95 0.02 230);
-  --sidebar-accent-foreground: oklch(0.3 0.05 260);
-  --sidebar-border: oklch(0.9 0.02 230);
-  --sidebar-ring: oklch(0.85 0.05 230);
+  --sidebar: oklch(0.99 0 0);
+  --sidebar-foreground: oklch(0.25 0.02 350);
+  --sidebar-primary: oklch(0.75 0.18 15);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.97 0.01 350);
+  --sidebar-accent-foreground: oklch(0.25 0.02 350);
+  --sidebar-border: oklch(0.92 0.02 350);
+  --sidebar-ring: oklch(0.75 0.18 15);
 }
 
 .dark {
-  /* Dark Mode: Not a primary focus for this clinic vibe, but keeping it functional */
-  --background: oklch(0.2 0.02 260);
-  --foreground: oklch(0.95 0.01 260);
-  --card: oklch(0.25 0.02 260);
-  --card-foreground: oklch(0.95 0.01 260);
-  --popover: oklch(0.25 0.02 260);
-  --popover-foreground: oklch(0.95 0.01 260);
-  --primary: oklch(0.7 0.1 230);
-  --primary-foreground: oklch(0.95 0.01 260);
-  --secondary: oklch(0.7 0.1 10);
-  --secondary-foreground: oklch(0.95 0.01 260);
-  --muted: oklch(0.3 0.02 260);
-  --muted-foreground: oklch(0.7 0.02 260);
-  --accent: oklch(0.3 0.02 260);
-  --accent-foreground: oklch(0.95 0.01 260);
-  --destructive: oklch(0.5 0.2 25);
-  --destructive-foreground: oklch(0.95 0.01 260);
-  --border: oklch(0.3 0.02 260);
-  --input: oklch(0.3 0.02 260);
-  --ring: oklch(0.7 0.1 230);
-  --chart-1: oklch(0.7 0.1 230);
-  --chart-2: oklch(0.8 0.1 10);
-  --chart-3: oklch(0.8 0.1 140);
-  --chart-4: oklch(0.85 0.08 60);
-  --chart-5: oklch(0.7 0.1 280);
-  --sidebar: oklch(0.2 0.02 260);
-  --sidebar-foreground: oklch(0.95 0.01 260);
-  --sidebar-primary: oklch(0.7 0.1 230);
-  --sidebar-primary-foreground: oklch(0.95 0.01 260);
-  --sidebar-accent: oklch(0.3 0.02 260);
-  --sidebar-accent-foreground: oklch(0.95 0.01 260);
-  --sidebar-border: oklch(0.3 0.02 260);
-  --sidebar-ring: oklch(0.7 0.1 230);
+  /* Dark Mode: Deep Plum/Charcoal */
+  --background: 0 0% 100%;
+  --foreground: 335 20% 20%;
+  /* Dark warm gray/brown */
+
+  --card: 0 0% 100%;
+  --card-foreground: 335 20% 20%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 335 20% 20%;
+
+  --primary: 335 70% 65%;
+  /* Soft Pink */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 35 40% 96%;
+  /* Warm Beige/Cream */
+  --secondary-foreground: 335 20% 20%;
+
+  --muted: 335 10% 96%;
+  --muted-foreground: 335 10% 50%;
+
+  --accent: 35 60% 90%;
+  /* Soft Gold/Beige */
+  --accent-foreground: 335 20% 20%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 335 20% 90%;
+  --input: 335 20% 90%;
+  --ring: 335 70% 65%;
+
+  --radius: 0.75rem;
+
+  --chart-1: oklch(0.75 0.18 15);
+  --chart-2: oklch(0.7 0.15 330);
+  --chart-3: oklch(0.8 0.12 300);
+  --chart-4: oklch(0.85 0.1 60);
+  --chart-5: oklch(0.6 0.1 280);
+
+  --sidebar: oklch(0.18 0.03 300);
+  --sidebar-foreground: oklch(0.98 0.01 350);
+  --sidebar-primary: oklch(0.75 0.18 15);
+  --sidebar-primary-foreground: oklch(0.15 0.03 300);
+  --sidebar-accent: oklch(0.25 0.03 300);
+  --sidebar-accent-foreground: oklch(0.98 0.01 350);
+  --sidebar-border: oklch(0.25 0.03 300);
+  --sidebar-ring: oklch(0.75 0.18 15);
 }
 
 @theme inline {
